@@ -1,0 +1,4 @@
+weekday = "Monday" / "Tuesday" / "Wednesday" / "Thursday" / "Friday" / "Saturday" / "Sunday"
+month = "Jan" / "Feb" / "Mar" / "Apr" / "May" / "Jun" / "Jul" / "Aug" / "Sep" / "Oct" / "Nov" / "Dec"
+date = weekday ", " month 2DIGIT [4DIGIT]
+temp = weekday month / weekday

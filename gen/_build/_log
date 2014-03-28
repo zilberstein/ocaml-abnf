@@ -1,0 +1,40 @@
+### Starting build.
+# Target: gen_types.ml.depends, tags: { extension:ml, file:gen_types.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules gen_types.ml > gen_types.ml.depends # cached
+# Target: abnf_lexer.ml.depends, tags: { extension:ml, file:abnf_lexer.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules abnf_lexer.ml > abnf_lexer.ml.depends # cached
+# Target: abnf_location.ml.depends, tags: { extension:ml, file:abnf_location.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules abnf_location.ml > abnf_location.ml.depends # cached
+# Target: abnf_location.cmo, tags: { byte, compile, extension:ml, file:abnf_location.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o abnf_location.cmo abnf_location.ml # cached
+# Target: abnf_parser.ml.depends, tags: { extension:ml, file:abnf_parser.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules abnf_parser.ml > abnf_parser.ml.depends # cached
+# Target: abnf_ops.ml.depends, tags: { extension:ml, file:abnf_ops.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules abnf_ops.ml > abnf_ops.ml.depends # cached
+# Target: abnf_syntaxtree.ml.depends, tags: { extension:ml, file:abnf_syntaxtree.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules abnf_syntaxtree.ml > abnf_syntaxtree.ml.depends # cached
+# Target: abnf_syntaxtree.cmo, tags: { byte, compile, extension:ml, file:abnf_syntaxtree.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o abnf_syntaxtree.cmo abnf_syntaxtree.ml # cached
+# Target: abnf_ops.cmo, tags: { byte, compile, extension:ml, file:abnf_ops.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o abnf_ops.cmo abnf_ops.ml # cached
+# Target: abnf_parser.cmo, tags: { byte, compile, extension:ml, file:abnf_parser.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o abnf_parser.cmo abnf_parser.ml # cached
+# Target: abnf_lexer.cmo, tags: { byte, compile, extension:ml, file:abnf_lexer.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o abnf_lexer.cmo abnf_lexer.ml # cached
+# Target: gen_types.cmo, tags: { byte, compile, extension:ml, file:gen_types.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o gen_types.cmo gen_types.ml # cached
+# Target: abnf_location.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_location.cmx, file:abnf_location.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o abnf_location.cmx abnf_location.ml # cached
+# Target: abnf_syntaxtree.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_syntaxtree.cmx, file:abnf_syntaxtree.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o abnf_syntaxtree.cmx abnf_syntaxtree.ml # cached
+# Target: abnf_ops.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_ops.cmx, file:abnf_ops.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o abnf_ops.cmx abnf_ops.ml # cached
+# Target: abnf_parser.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_parser.cmx, file:abnf_parser.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o abnf_parser.cmx abnf_parser.ml # cached
+# Target: abnf_lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_lexer.cmx, file:abnf_lexer.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o abnf_lexer.cmx abnf_lexer.ml # cached
+# Target: gen_types.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_types.cmx, file:gen_types.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o gen_types.cmx gen_types.ml # cached
+# Target: gen_types.native, tags: { dont_link_with, extension:native, file:gen_types.native, link, native, ocaml, program, quiet }
+/usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_types.cmx -o gen_types.native # cached
+# Compilation successful.
