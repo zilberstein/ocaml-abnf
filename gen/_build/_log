@@ -1,6 +1,6 @@
 ### Starting build.
 # Target: gen_types.ml.depends, tags: { extension:ml, file:gen_types.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules gen_types.ml > gen_types.ml.depends # cached
+/usr/local/bin/ocamldep.opt -modules gen_types.ml > gen_types.ml.depends
 # Target: abnf_lexer.ml.depends, tags: { extension:ml, file:abnf_lexer.ml, ocaml, ocamldep, quiet }
 /usr/local/bin/ocamldep.opt -modules abnf_lexer.ml > abnf_lexer.ml.depends # cached
 # Target: abnf_location.ml.depends, tags: { extension:ml, file:abnf_location.ml, ocaml, ocamldep, quiet }
@@ -22,7 +22,7 @@
 # Target: abnf_lexer.cmo, tags: { byte, compile, extension:ml, file:abnf_lexer.ml, implem, ocaml, quiet }
 /usr/local/bin/ocamlc.opt -c -o abnf_lexer.cmo abnf_lexer.ml # cached
 # Target: gen_types.cmo, tags: { byte, compile, extension:ml, file:gen_types.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -o gen_types.cmo gen_types.ml # cached
+/usr/local/bin/ocamlc.opt -c -o gen_types.cmo gen_types.ml
 # Target: abnf_location.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_location.cmx, file:abnf_location.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o abnf_location.cmx abnf_location.ml # cached
 # Target: abnf_syntaxtree.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_syntaxtree.cmx, file:abnf_syntaxtree.ml, implem, native, ocaml, quiet }
@@ -34,7 +34,9 @@
 # Target: abnf_lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_lexer.cmx, file:abnf_lexer.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o abnf_lexer.cmx abnf_lexer.ml # cached
 # Target: gen_types.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_types.cmx, file:gen_types.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -o gen_types.cmx gen_types.ml # cached
+/usr/local/bin/ocamlopt.opt -c -o gen_types.cmx gen_types.ml
 # Target: gen_types.native, tags: { dont_link_with, extension:native, file:gen_types.native, link, native, ocaml, program, quiet }
-/usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_types.cmx -o gen_types.native # cached
+/usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_types.cmx -o gen_types.native
++ /usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_types.cmx -o gen_types.native
+ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/pg/vsshs4js4xggn8mrfsgth50r0000gn/T/camlstartup48f42d.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
 # Compilation successful.

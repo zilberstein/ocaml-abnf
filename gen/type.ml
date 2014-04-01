@@ -20,3 +20,6 @@ type month =
   | Nov
   | Dec
 type date = weekday * month * rep * rep
+type temp = 
+  | CONCAT of weekday * month
+  | REF of weekday

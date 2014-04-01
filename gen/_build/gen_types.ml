@@ -30,21 +30,42 @@ let rec has_state (r : rule) : bool =
 
 let rec name_of (r : rule) : string = 
   begin match r with
-	| S_terminal t      -> "terminal"
+	| S_terminal t      -> "???"
 	| S_string   s      -> s
-	| S_concat (r1, r2) -> sprintf "%s * %s" (name_of r1) (name_of r2)
-	| S_reference s     -> s
+	| S_concat (r1, r2) -> "???"
+	| S_reference s     -> "???"
 	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> "bracket"
-	| S_repetition (i1, i2, r)   -> "rep"
-	| S_element_list (i1, i2, r) -> "list"
-	| S_hex_range (i1, i2)       -> "hex"
-	| S_any_except (r1, r2)      -> "except"
+	| S_bracket r                -> "???"
+	| S_repetition (i1, i2, r)   -> "???"
+	| S_element_list (i1, i2, r) -> "???"
+	| S_hex_range (i1, i2)       -> "???"
+	| S_any_except (r1, r2)      -> "???"
   end
 
+let type_string_of_terminal (t : terminal) : string =
+  begin match t with
+	| ALPHA    -> "string"
+	| UPALPHA  -> "string"
+	| LOALPHA  -> "string"
+	| DIGIT    -> "int"
+	| HEXDIGIT -> "int"
+	| DQUOTE   -> "char"
+	| SP       -> "char"
+	| HTAB     -> "char"
+	| WSP      -> "char"
+	| LWSP     -> "string"
+	| VCHAR    -> "string"
+	| CHAR     -> "string"
+	| OCTET    -> "int"
+	| CTL      -> "string"
+	| CR       -> "string"
+	| LF       -> "string"
+	| CRLF     -> "string"
+	| BIT      -> "int"
+  end
 let rec type_string_of_rule (r : rule) : string =
   begin match r with
-	| S_terminal t      -> "terminal"
+	| S_terminal t      -> type_string_of_terminal t
 	| S_string   s      -> ""
 	| S_concat (r1, r2) -> 
 	   begin match has_state r1, has_state r2 with
@@ -55,22 +76,31 @@ let rec type_string_of_rule (r : rule) : string =
 	   end
 	| S_reference s     -> s
 	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> "bracket"
-	| S_repetition (i1, i2, r)   -> "rep"
-	| S_element_list (i1, i2, r) -> "list"
-	| S_hex_range (i1, i2)       -> "hex"
-	| S_any_except (r1, r2)      -> "except"
+	| S_bracket r                -> type_string_of_rule r
+	| S_repetition (i1, i2, r)   -> type_string_of_rule r
+	| S_element_list (i1, i2, r) -> type_string_of_rule r
+	| S_hex_range (i1, i2)       -> type_string_of_rule r
+	| S_any_except (r1, r2)      -> type_string_of_rule r
   end
 
 let rec string_of_rule (r : rule) : string =
   begin match r with
 	| S_alt (r1, r2) ->
-	   (if is_alt r2 then
-	      sprintf "\n  | %s%s"
+	   if is_alt r2 then
+	      sprintf "\n  | %s%s" (if has_state r1 then
+					     sprintf "%s of %s" (name_of r1) (string_of_rule r1)
+					   else
+					     name_of r1) (string_of_rule r2)
 	    else
-	      sprintf "\n  | %s\n  | %s") (if has_state r1 then string_of_rule r1 else name_of r1)
-					  (if has_state r2 then string_of_rule r2 else name_of r2)
-	| _              -> type_string_of_rule r
+	      sprintf "\n  | %s\n  | %s" (if has_state r1 then
+					     sprintf "%s of %s" (name_of r1) (string_of_rule r1)
+					   else
+					     name_of r1)
+					  (if has_state r2 then
+					     sprintf "%s of %s" (name_of r2) (string_of_rule r2)
+					   else
+					     name_of r2)
+	| _ -> type_string_of_rule r
   end
 
 let string_of_rule_definition (rd : rule_definition) : string =
@@ -84,5 +114,5 @@ let string_of_rule_definition (rd : rule_definition) : string =
 let _ =
   let lexbuf = Lexing.from_channel (open_in "type.abnf") in
   let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
-  List.iter (fun rule -> printf "%s" (string_of_rule_definition rule)) rules ;
+  List.iter (fun rule -> print_endline (string_of_rule_definition rule)) rules ;
 
