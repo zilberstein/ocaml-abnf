@@ -32,7 +32,7 @@ let rec name_of (r : rule) : string =
   begin match r with
 	| S_terminal t      -> "???"
 	| S_string   s      -> s
-	| S_concat (r1, r2) -> "???"
+	| S_concat (r1, r2) -> name_of r1
 	| S_reference s     -> "???"
 	| S_alt (r1, r2)    -> failwith "illegal nesting"
 	| S_bracket r                -> "???"
@@ -109,10 +109,3 @@ let string_of_rule_definition (rd : rule_definition) : string =
   Buffer.add_string b (string_of_rule rd.s_rule) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
-  
-
-let _ =
-  let lexbuf = Lexing.from_channel (open_in "type.abnf") in
-  let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
-  List.iter (fun rule -> print_endline (string_of_rule_definition rule)) rules ;
-

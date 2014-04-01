@@ -6,6 +6,7 @@ type weekday =
   | Friday
   | Saturday
   | Sunday
+
 type month = 
   | Jan
   | Feb
@@ -19,7 +20,10 @@ type month =
   | Oct
   | Nov
   | Dec
-type date = weekday * month * rep * rep
+
+type date = weekday * month * int * int
+
 type temp = 
-  | CONCAT of weekday * month
-  | REF of weekday
+  | ??? of weekday * month
+  | ??? of weekday
+

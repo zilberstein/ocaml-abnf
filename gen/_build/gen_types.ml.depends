@@ -1,1 +1,1 @@
-gen_types.ml: Abnf_lexer Abnf_parser Abnf_syntaxtree Buffer Lexing List Printf Str
+gen_types.ml: Abnf_syntaxtree Buffer Printf Str
