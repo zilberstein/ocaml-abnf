@@ -3,12 +3,11 @@ open Gen_types
 
 open Buffer
 open Printf
+open String
 
 let indent_line (b : Buffer.t) (ind : int ref) (s : string) : unit =
   Buffer.add_string b "\n" ;
-  for i=1 to !ind do
-    Buffer.add_string b "  "
-  done ;
+  Buffer.add_string b (String.make (!ind * 2) ' ') ;
   Buffer.add_string b s
 
 let indent_lines (b : Buffer.t) (ind : int ref) (l : string list) : unit =
@@ -16,37 +15,43 @@ let indent_lines (b : Buffer.t) (ind : int ref) (l : string list) : unit =
 
 let is_concat (r : rule) : bool =
   begin match r with
-	| S_concat (_, _) -> true
-	| _ -> false
+        | S_concat (_, _) -> true
+        | _ -> false
   end
 
 let rec string_of_rule_parser_nested (r : rule) : string =
   begin match r with
-	| S_terminal t      -> "parse_terminal st"
-	| S_string   s      -> sprintf "parse_string \"%s\"" s
-	| S_concat (r1, r2) -> failwith "illegal nesting"
-	| S_reference s     -> sprintf "parse_%s !s" s
-	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> "???"
-	| S_repetition (i1, i2, r)   -> "???"
-	| S_element_list (i1, i2, r) -> "???"
-	| S_hex_range (i1, i2)       -> "???"
-	| S_any_except (r1, r2)      -> "???"
+        | S_terminal t      -> "parse_terminal st"
+        | S_string   s      -> sprintf "parse_string \"%s\"" s
+        | S_concat (r1, r2) -> failwith "illegal nesting"
+        | S_reference s     -> sprintf "parse_%s !s" s
+        | S_alt (r1, r2)    -> failwith "illegal nesting"
+        | S_bracket r                -> "???"
+        | S_repetition (i1, i2, r)   -> "???"
+        | S_element_list (i1, i2, r) -> "???"
+        | S_hex_range (i1, i2)       -> "???"
+        | S_any_except (r1, r2)      -> "???"
   end
 
 
-let rec string_of_rule_parser (r : rule) (n : int) : string list =
+let rec string_of_rule_parser (r : rule) (out : string) (n : int) : string list =
   begin match r with
-	| S_concat (r1, r2) ->
-	   sprintf "let a%d = %s in" n (string_of_rule_parser_nested r1) ::
+        | S_concat (r1, r2) ->
+           (if has_state r1 then 
+              sprintf "let a%d = %s in" n
+            else
+              sprintf "let _ = %s in") (string_of_rule_parser_nested r1) ::
 	     (begin match r2 with
-		   | S_concat (_, _) ->
-		      string_of_rule_parser r2 (n + 1)
-	           | _  ->
-		      sprintf "let a%d = %s in" n "???" ::
-			"(a0,a1,a2)" :: []
-	     end)
-	| S_alt (r1, r2) -> string_of_rule_parser r1 n
+	            | S_concat (_, _) ->
+		      if has_state r1 then
+                        string_of_rule_parser r2 (out ^ sprintf "a%d, " n) (n + 1)
+                      else
+                         string_of_rule_parser r2 out n
+                    | _  ->
+                       sprintf "let a%d = %s in" n "???" ::
+                         (out ^ sprintf "a%d)" n) :: []
+	      end)
+	| S_alt (r1, r2) -> string_of_rule_parser r1 "(" n
 	| _ -> string_of_rule_parser_nested r :: []
   end
 
@@ -57,7 +62,7 @@ let string_of_rule_def_parser (rd : rule_definition) : string =
   indent_line b ind (sprintf "let parse_%s (s : string) : %s =" rd.s_name rd.s_name) ;
   ind := !ind + 1 ;
   indent_line b ind "let st = ref s in" ;
-  indent_lines b ind (string_of_rule_parser rd.s_rule 0) ;
+  indent_lines b ind (string_of_rule_parser rd.s_rule "(" 0) ;
   Buffer.contents b
 
 let _ =
