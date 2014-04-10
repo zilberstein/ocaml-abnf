@@ -16,24 +16,24 @@ let is_alt (r : rule) : bool =
 
 let rec terminal_has_state (t : terminal) : bool =
   begin match t with
-	| ALPHA    -> true
-	| UPALPHA  -> true
-	| LOALPHA  -> true
-	| DIGIT    -> true
-	| HEXDIGIT -> true
-	| DQUOTE   -> false
-	| SP       -> false
-	| HTAB     -> false
-	| WSP      -> false
-	| LWSP     -> false
-	| VCHAR    -> true
-	| CHAR     -> true
-	| OCTET    -> true
-	| CTL      -> true
-	| CR       -> false
-	| LF       -> false
-	| CRLF     -> false
-	| BIT      -> true
+        | ALPHA    -> true
+        | UPALPHA  -> true
+        | LOALPHA  -> true
+        | DIGIT    -> true
+        | HEXDIGIT -> true
+        | DQUOTE   -> false
+        | SP       -> false
+        | HTAB     -> false
+        | WSP      -> false
+        | LWSP     -> false
+        | VCHAR    -> true
+        | CHAR     -> true
+        | OCTET    -> true
+        | CTL      -> true
+        | CR       -> false
+        | LF       -> false
+        | CRLF     -> false
+        | BIT      -> true
   end
 
 let rec has_state (r : rule) : bool =
@@ -44,7 +44,7 @@ let rec has_state (r : rule) : bool =
 	| S_reference s     -> true
 	| S_alt (r1, r2)    -> true
 	| S_bracket r                -> has_state r
-	| S_repetition (i1, i2, r)   -> true
+	| S_repetition (i1, i2, r)   -> has_state r
 	| S_element_list (i1, i2, r) -> has_state r
 	| S_hex_range (i1, i2)       -> true
 	| S_any_except (r1, r2)      -> has_state r1 || has_state r2

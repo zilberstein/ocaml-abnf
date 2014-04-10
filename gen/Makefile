@@ -1,5 +1,5 @@
 all:
-	ocamlbuild -lib str gen-parser.native
+	ocamlbuild -lib str gen_parser.native
 
 junk:
 	ocamlopt -c abnf_syntaxtree.ml

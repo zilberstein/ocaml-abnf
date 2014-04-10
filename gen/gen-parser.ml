@@ -43,9 +43,9 @@ let rec string_of_rule_parser (r : rule) (out : string) (n : int) : string list 
               sprintf "let _ = %s in") (string_of_rule_parser_nested r1) ::
 	     (begin match r2 with
 	            | S_concat (_, _) ->
-		      if has_state r1 then
-                        string_of_rule_parser r2 (out ^ sprintf "a%d, " n) (n + 1)
-                      else
+		       if has_state r1 then
+                         string_of_rule_parser r2 (out ^ sprintf "a%d, " n) (n + 1)
+                       else
                          string_of_rule_parser r2 out n
                     | _  ->
                        sprintf "let a%d = %s in" n "???" ::
