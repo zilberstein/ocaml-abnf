@@ -1,5 +1,6 @@
 open Abnf_syntaxtree
 open Gen_types
+open Gen_lexer
 
 open Buffer
 open Printf
@@ -79,7 +80,7 @@ let rec parser_of_rule (r : rule) : string =
                                          else
                                            name_of r1)
                      (if has_state r2 then
-                        sprintf "%s of %s" (name_of r2) (parser_of_rule r2)
+                        sprintf "%s {%s}" (parser_of_rule r2) (name_of r2)
                       else
                         name_of r2)
 	| _ -> parser_string_of_rule r
@@ -96,6 +97,7 @@ let _ =
   let lexbuf = Lexing.from_channel (open_in "ex.abnf") in
   let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
   List.iter (fun rule -> print_endline (string_of_rule_definition rule)) (List.rev rules) ;
+  List.iter (fun rule -> print_endline (lexer_of_rule_definition rule)) (List.rev rules) ;
   let start =
     begin match rules with
           | h :: t -> h
