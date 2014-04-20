@@ -3,6 +3,7 @@ open Abnf_syntaxtree
 open Buffer
 open Printf
 open Str
+open String
 
 let type_name (rd : rule_definition) : string =
   let r = Str.regexp "-" in
@@ -116,11 +117,24 @@ let rec regex_of_inner_rule (r : rule) : string =
 
 let rec regex_of_rule (r : rule) (name : string) (j : int) : string =
   begin match r with
-	| S_concat (r1, r2)
+	| S_concat (r1, r2) ->
+           begin match has_state r1, has_state r2 with
+                 | false, false -> ""
+                 | false, true  ->
+                    begin match r2 with
+                           | S_concat (r3, r4) -> sprintf "%s\n%s"
+                                                          (regex_of_rule (S_concat (r1, r3)) name j) 
+                                                          (regex_of_rule r4 name (j+1))
+                           | _ -> sprintf "let %s%d = %s" name j (regex_of_inner_rule r)
+                     end
+                 | true,  false -> sprintf "let %s%d = %s" name j (regex_of_inner_rule r)
+                 | true,  true  -> sprintf "%s\n%s" (regex_of_rule r1 name j)
+                                           (regex_of_rule r2 name (j + 1))
+           end
         | S_alt (r1, r2) ->
            begin match has_state r1, has_state r2 with
                  | false, false -> ""
-                 | false, true  -> regex_of_rule r2 name j
+                 | false, true  -> regex_of_rule r2 name j 
                  | true,  false -> regex_of_rule r1 name j
                  | true,  true  -> sprintf "%s\n%s" (regex_of_rule r1 name j)
                                            (regex_of_rule r2 name (j + 1))
@@ -129,81 +143,44 @@ let rec regex_of_rule (r : rule) (name : string) (j : int) : string =
         | _             -> sprintf "let %s%d = %s" name j (regex_of_inner_rule r)
   end
 
-let rec lexer_of_rule_stateless (r : rule) : string =
-  begin match r with
-	| S_terminal t      -> regex_of_terminal t
-	| S_string   s      -> sprintf "\"%s\"" s
-	| S_concat (r1, r2) -> sprintf "%s %s" (regex_of_inner_rule r1) (regex_of_inner_rule r2)
-	| S_reference s     -> ""
-	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> regex_of_inner_rule r
-	| S_repetition (io1, io2, r) -> sprintf "%s%s" (regex_of_inner_rule r)
-                       (begin match io1, io2 with
-                              | None, None       -> "*"
-                              | None, Some i     -> sprintf "{,%d}" i
-                              | Some i, None     -> if i = 1 then "+" else sprintf "{%d,}" i
-                              | Some i1, Some i2 ->
-                                 if i1 = i2 then 
-                                   sprintf "{%d}" i1
-                                 else
-                                   sprintf "{%d,%d}" i1 i2
-                        end)      
-	| S_element_list (i1, i2, r) -> regex_of_inner_rule r
-	| S_hex_range (i1, i2)       -> regex_of_inner_rule r
-	| S_any_except (r1, r2)      -> regex_of_inner_rule r
-  end
-
 let regex_of_rule_definition (rd : rule_definition) : string =
   let b = Buffer.create 16 in
   Buffer.add_string b (regex_of_rule rd.s_rule rd.s_name 0) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
 
+let rec lexer_of_rule_stateless (r : rule) : string =
+  "read lexbuf"
 
 let rec lexer_of_rule_stateful (r : rule) : string =
-  begin match r with
-	| S_terminal t      -> regex_of_terminal t
-	| S_string   s      -> sprintf "\"%s\"" s
-	| S_concat (r1, r2) -> sprintf "%s %s" (regex_of_inner_rule r1) (regex_of_inner_rule r2)
-	| S_reference s     -> ""
-	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> regex_of_inner_rule r
-	| S_repetition (io1, io2, r) -> sprintf "%s%s" (regex_of_inner_rule r)
-                       (begin match io1, io2 with
-                              | None, None       -> "*"
-                              | None, Some i     -> sprintf "{,%d}" i
-                              | Some i, None     -> if i = 1 then "+" else sprintf "{%d,}" i
-                              | Some i1, Some i2 ->
-                                 if i1 = i2 then 
-                                   sprintf "{%d}" i1
-                                 else
-                                   sprintf "{%d,%d}" i1 i2
-                        end)      
-	| S_element_list (i1, i2, r) -> regex_of_inner_rule r
-	| S_hex_range (i1, i2)       -> regex_of_inner_rule r
-	| S_any_except (r1, r2)      -> regex_of_inner_rule r
-  end
+  sprintf "%s (Lexing.lexeme lexbuf)" (name_of r)
 
 let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
   begin match r with
-	| S_concat (r1, r2)
+	| S_concat (r1, r2) ->
+           begin match has_state r1, has_state r2 with
+                 | false, false -> ""
+                 | false, true  ->
+                    begin match r2 with
+                           | S_concat (r3, r4) -> sprintf "%s\n%s"
+                                                          (lexer_of_rule (S_concat (r1, r3)) name j) 
+                                                          (lexer_of_rule r4 name (j+1))
+                           | _ -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateless r)
+                     end
+                 | true,  false -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
+                 | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name j)
+                                           (lexer_of_rule r2 name (j + 1))
+           end
         | S_alt (r1, r2) ->
            begin match has_state r1, has_state r2 with
-                 | false, false -> sprintf "%s\n%s" (lexer_of_rule_stateless r1)
-                                     (lexer_of_rule_stateless r2)
-                 | false, true  -> sprintf "%s\n%s" (lexer_of_rule r2 name j)
-                                     (lexer_of_rule_stateless r2)
-                 | true,  false -> sprintf "%s\n%s" (lexer_of_rule r1 name j)
-                                     (lexer_of_rule_stateless r2)
+                 | false, false -> ""
+                 | false, true  -> lexer_of_rule r2 name j 
+                 | true,  false -> lexer_of_rule r1 name j
                  | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name j)
-                                     (lexer_of_rule r2 name (j + 1))
-            end
+                                           (lexer_of_rule r2 name (j + 1))
+           end
 	| S_reference s -> ""
-        | _             -> sprintf "let %s%d = %s" name j ((
-                                     if has_state r then
-                                       lexer_of_rule_stateful
-                                     else
-                                       lexer_of_rule_stateless) r)
+        | _             -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
   end
 
 let lexer_of_rule_definition (rd : rule_definition) : string =

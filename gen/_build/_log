@@ -1,6 +1,6 @@
 ### Starting build.
 # Target: gen_parser.ml.depends, tags: { extension:ml, file:gen_parser.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules gen_parser.ml > gen_parser.ml.depends
+/usr/local/bin/ocamldep.opt -modules gen_parser.ml > gen_parser.ml.depends # cached
 # Target: abnf_lexer.ml.depends, tags: { extension:ml, file:abnf_lexer.ml, ocaml, ocamldep, quiet }
 /usr/local/bin/ocamldep.opt -modules abnf_lexer.ml > abnf_lexer.ml.depends # cached
 # Target: abnf_location.ml.depends, tags: { extension:ml, file:abnf_location.ml, ocaml, ocamldep, quiet }
@@ -50,5 +50,5 @@
 # Target: gen_parser.native, tags: { dont_link_with, extension:native, file:gen_parser.native, link, native, ocaml, program, quiet }
 /usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
 + /usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
-ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/pg/vsshs4js4xggn8mrfsgth50r0000gn/T/camlstartup77097d.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
+ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/pg/vsshs4js4xggn8mrfsgth50r0000gn/T/camlstartupf20756.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
 # Compilation successful.
