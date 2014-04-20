@@ -97,6 +97,7 @@ let _ =
   let lexbuf = Lexing.from_channel (open_in "ex.abnf") in
   let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
   List.iter (fun rule -> print_endline (string_of_rule_definition rule)) (List.rev rules) ;
+  List.iter (fun rule -> print_endline (regex_of_rule_definition rule)) (List.rev rules) ;
   List.iter (fun rule -> print_endline (lexer_of_rule_definition rule)) (List.rev rules) ;
   let start =
     begin match rules with
