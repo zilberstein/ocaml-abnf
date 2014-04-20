@@ -83,35 +83,43 @@ let regex_of_terminal (t : terminal) : string =
 	| CHAR     -> "?"
 	| OCTET    -> "?"
 	| CTL      -> "?"
-	| CR       -> "'\r'"
-	| LF       -> "'\n'"
-	| CRLF     -> "\"\r\n\""
+	| CR       -> "'\\r'"
+	| LF       -> "'\\n'"
+	| CRLF     -> "\"\\r\\n\""
 	| BIT      -> "['0' '1']"
   end
-let rec lexer_of_rule (r : rule) : string =
+
+let rec regex_of_rule (r : rule) : string =
   begin match r with
 	| S_terminal t      -> regex_of_terminal t
-	| S_string   s      -> s
-	| S_concat (r1, r2) -> sprintf "%s %s" (lexer_of_rule r1) (lexer_of_rule r2)
-	| S_reference s     -> s
-	| S_alt (r1, r2)    -> sprintf "%s | %s" (lexer_of_rule r1) (lexer_of_rule r2)
-	| S_bracket r                -> lexer_of_rule r
-	| S_repetition (io1, io2, r) -> sprintf "%s%s" (lexer_of_rule r)
+	| S_string   s      -> sprintf "\"%s\"" s
+	| S_concat (r1, r2) -> sprintf "%s %s" (regex_of_rule r1) (regex_of_rule r2)
+	| S_reference s     -> ""
+	| S_alt (r1, r2)    -> failwith "illegal nesting"
+	| S_bracket r                -> "???"
+	| S_repetition (io1, io2, r) -> sprintf "%s%s" (regex_of_rule r)
                        (begin match io1, io2 with
                               | None, None       -> "*"
                               | None, Some i     -> sprintf "{,%d}" i
                               | Some i, None     -> if i = 1 then "+" else sprintf "{%d,}" i
                               | Some i1, Some i2 -> sprintf "{%d,%d}" i1 i2
-                        end)
-	                                                  
-	| S_element_list (i1, i2, r) -> lexer_of_rule r
-	| S_hex_range (i1, i2)       -> lexer_of_rule r
-	| S_any_except (r1, r2)      -> lexer_of_rule r
+                        end)      
+	| S_element_list (i1, i2, r) -> regex_of_rule r
+	| S_hex_range (i1, i2)       -> regex_of_rule r
+	| S_any_except (r1, r2)      -> regex_of_rule r
+  end
+
+
+let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
+  begin match r with
+	| S_concat (r1, r2) -> sprintf "%s\n%s" (lexer_of_rule r1 name j) (lexer_of_rule r2 name (j + 1))
+	| S_reference s     -> ""
+	| S_alt (r1, r2)    -> sprintf "%s\n%s" (lexer_of_rule r1 name j) (lexer_of_rule r2 name (j + 1))
+        | _                 -> sprintf "let %s%d = %s" name j (regex_of_rule r)
   end
 
 let lexer_of_rule_definition (rd : rule_definition) : string =
   let b = Buffer.create 16 in
-  Buffer.add_string b (sprintf "let %s = " (type_name rd)) ;
-  Buffer.add_string b (lexer_of_rule rd.s_rule) ;
+  Buffer.add_string b (lexer_of_rule rd.s_rule rd.s_name 0) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
