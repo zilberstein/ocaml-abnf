@@ -153,7 +153,7 @@ let rec lexer_of_rule_stateless (r : rule) : string =
   "read lexbuf"
 
 let rec lexer_of_rule_stateful (r : rule) : string =
-  sprintf "%s (Lexing.lexeme lexbuf)" (name_of r)
+  sprintf "%s (Lexing.lexeme lexbuf)" (String.uppercase (name_of r))
 
 let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
   begin match r with

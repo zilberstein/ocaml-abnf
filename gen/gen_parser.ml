@@ -93,16 +93,26 @@ let parser_of_rule_definition (rd : rule_definition) : string =
   Buffer.add_string b "\n" ;
   Buffer.contents b
 
+let rule_to_file (oc : out_channel) (t : rule_definition -> string) (r : rule_definition) : unit =
+  let s = t r in
+  output oc s 0 (length s)
+
 let _ =
   let lexbuf = Lexing.from_channel (open_in "ex.abnf") in
-  let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
-  List.iter (fun rule -> print_endline (string_of_rule_definition rule)) (List.rev rules) ;
-  List.iter (fun rule -> print_endline (regex_of_rule_definition rule)) (List.rev rules) ;
-  List.iter (fun rule -> print_endline (lexer_of_rule_definition rule)) (List.rev rules) ;
+  let rules = List.rev (Abnf_parser.main Abnf_lexer.token lexbuf) in
+  let types = open_out "gen/types.ml" in
+  List.iter (rule_to_file types string_of_rule_definition) rules ;
+  close_out types ;
+  let lexer = open_out "gen/lexer.mll" in
+  List.iter (rule_to_file lexer regex_of_rule_definition) rules ;
+  List.iter (rule_to_file lexer lexer_of_rule_definition) rules ;
+  close_out lexer ;
   let start =
     begin match rules with
           | h :: t -> h
           | [] -> failwith "no rules"
     end in
-  printf "%%start <Type.%s option> %s\n" start.s_name start.s_name ;
-  List.iter (fun rule -> print_endline (parser_of_rule_definition rule)) rules
+  let parser = open_out "gen/parser.mly" in
+  fprintf parser "%%start <Type.%s option> %s\n" start.s_name start.s_name ;
+  List.iter (rule_to_file parser parser_of_rule_definition) rules ;
+  close_out parser
