@@ -162,14 +162,17 @@ let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
                  | false, false -> ""
                  | false, true  ->
                     begin match r2 with
-                           | S_concat (r3, r4) -> sprintf "%s\n%s"
-                                                          (lexer_of_rule (S_concat (r1, r3)) name j) 
-                                                          (lexer_of_rule r4 name (j+1))
+                           | S_concat (r3, r4) ->
+                              sprintf "%s\n%s"
+                                      (lexer_of_rule (S_concat (r1, r3)) name j) 
+                                      (lexer_of_rule r4 name (j+1))
                            | _ -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateless r)
                      end
-                 | true,  false -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
-                 | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name j)
-                                           (lexer_of_rule r2 name (j + 1))
+                 | true,  false ->
+                    sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
+                 | true,  true  ->
+                    sprintf "%s\n%s" (lexer_of_rule r1 name j)
+                            (lexer_of_rule r2 name (j + 1))
            end
         | S_alt (r1, r2) ->
            begin match has_state r1, has_state r2 with

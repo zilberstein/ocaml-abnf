@@ -43,7 +43,29 @@ let type_string_of_terminal (t : terminal) : string =
 	| BIT      -> "int"
   end
 
-let rec parser_string_of_rule (r : rule) : string =
+let rec parser_of_rule_stateful (r : rule) (name : string) (j : int) : string * string =
+  ((begin match r with
+	| S_terminal t      -> type_string_of_terminal t
+	| S_string   s      -> ""
+	| S_concat (r1, r2) -> 
+	   begin match has_state r1, has_state r2 with
+	   | false, false -> ""
+	   | false, true  -> type_string_of_rule r2
+	   | true,  false -> type_string_of_rule r1
+	   | true,  true  -> sprintf "%s * %s" (type_string_of_rule r1) (type_string_of_rule r2)
+	   end
+	| S_reference s     -> s
+	| S_alt (r1, r2)    -> failwith "illegal nesting"
+	| S_bracket r                -> type_string_of_rule r
+	| S_repetition (i1, i2, r)   -> 
+	   let ty = type_string_of_rule r in
+	   if ty = "char" then "string" else ty
+	| S_element_list (i1, i2, r) -> type_string_of_rule r
+	| S_hex_range (i1, i2)       -> type_string_of_rule r
+	| S_any_except (r1, r2)      -> type_string_of_rule r
+   end),"hello")
+
+let rec parser_of_rule_stateless (r : rule) : string =
   begin match r with
 	| S_terminal t      -> type_string_of_terminal t
 	| S_string   s      -> ""
@@ -65,7 +87,7 @@ let rec parser_string_of_rule (r : rule) : string =
 	| S_any_except (r1, r2)      -> type_string_of_rule r
   end
 
-let rec parser_of_rule (r : rule) : string =
+(*let rec parser_of_rule (r : rule) : string =
   begin match r with
         | S_alt (r1, r2) ->
            if is_alt r2 then
@@ -84,14 +106,51 @@ let rec parser_of_rule (r : rule) : string =
                       else
                         name_of r2)
 	| _ -> parser_string_of_rule r
+  end*)
+
+
+let rec parser_of_rule (r : rule) (name : string) (j : int) : string =
+  begin match r with
+	| S_concat (r1, r2) ->
+           begin match has_state r1, has_state r2 with
+                 | false, false -> ""
+                 | false, true  ->
+                    begin match r2 with
+                           | S_concat (r3, r4) ->
+                              sprintf "%s\n%s"
+                                      (parser_of_rule (S_concat (r1, r3)) name j) 
+                                      (parser_of_rule r4 name (j+1))
+                           | _ -> (match (parser_of_rule_stateful r "x" 0) with
+                                  | seq, state ->
+                                     sprintf "| %s { %s }" seq state)
+                    end
+                 | true,  false -> (match (parser_of_rule_stateful r "x" 0) with
+                                   | seq, state ->
+                                      sprintf "| %s { %s }" seq state) 
+                 | true,  true  ->
+                    sprintf "%s\n%s" (parser_of_rule r1 name j)
+                            (parser_of_rule r2 name (j + 1))
+           end
+        | S_alt (r1, r2) ->
+           begin match has_state r1, has_state r2 with
+                 | false, false -> ""
+                 | false, true  -> parser_of_rule r2 name j 
+                 | true,  false -> parser_of_rule r1 name j
+                 | true,  true  -> sprintf "%s\n%s" (parser_of_rule r1 name j)
+                                           (parser_of_rule r2 name (j + 1))
+           end
+	| S_reference s -> ""
+        | _             -> match (parser_of_rule_stateful r "x" 0) with
+                                   | seq, state ->
+                                      sprintf "| %s { %s }" seq state 
   end
 
 let parser_of_rule_definition (rd : rule_definition) : string =
   let b = Buffer.create 16 in
-  Buffer.add_string b (sprintf "%s:" (type_name rd)) ;
-  Buffer.add_string b (parser_of_rule rd.s_rule) ;
+  Buffer.add_string b (parser_of_rule rd.s_rule rd.s_name 0) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
+
 
 let rule_to_file (oc : out_channel) (t : rule_definition -> string) (r : rule_definition) : unit =
   let s = t r in
