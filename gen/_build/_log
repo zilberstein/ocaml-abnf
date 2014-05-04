@@ -1,6 +1,6 @@
 ### Starting build.
 # Target: gen_parser.ml.depends, tags: { extension:ml, file:gen_parser.ml, ocaml, ocamldep, quiet }
-/usr/local/bin/ocamldep.opt -modules gen_parser.ml > gen_parser.ml.depends
+/usr/local/bin/ocamldep.opt -modules gen_parser.ml > gen_parser.ml.depends # cached
 # Target: abnf_lexer.ml.depends, tags: { extension:ml, file:abnf_lexer.ml, ocaml, ocamldep, quiet }
 /usr/local/bin/ocamldep.opt -modules abnf_lexer.ml > abnf_lexer.ml.depends # cached
 # Target: abnf_location.ml.depends, tags: { extension:ml, file:abnf_location.ml, ocaml, ocamldep, quiet }
@@ -21,14 +21,18 @@
 /usr/local/bin/ocamlc.opt -c -o abnf_parser.cmo abnf_parser.ml # cached
 # Target: abnf_lexer.cmo, tags: { byte, compile, extension:ml, file:abnf_lexer.ml, implem, ocaml, quiet }
 /usr/local/bin/ocamlc.opt -c -o abnf_lexer.cmo abnf_lexer.ml # cached
+# Target: aux.ml.depends, tags: { extension:ml, file:aux.ml, ocaml, ocamldep, quiet }
+/usr/local/bin/ocamldep.opt -modules aux.ml > aux.ml.depends
 # Target: gen_lexer.ml.depends, tags: { extension:ml, file:gen_lexer.ml, ocaml, ocamldep, quiet }
 /usr/local/bin/ocamldep.opt -modules gen_lexer.ml > gen_lexer.ml.depends # cached
-# Target: gen_lexer.cmo, tags: { byte, compile, extension:ml, file:gen_lexer.ml, implem, ocaml, quiet }
-/usr/local/bin/ocamlc.opt -c -o gen_lexer.cmo gen_lexer.ml # cached
+# Target: aux.cmo, tags: { byte, compile, extension:ml, file:aux.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o aux.cmo aux.ml
 # Target: gen_types.ml.depends, tags: { extension:ml, file:gen_types.ml, ocaml, ocamldep, quiet }
 /usr/local/bin/ocamldep.opt -modules gen_types.ml > gen_types.ml.depends # cached
 # Target: gen_types.cmo, tags: { byte, compile, extension:ml, file:gen_types.ml, implem, ocaml, quiet }
 /usr/local/bin/ocamlc.opt -c -o gen_types.cmo gen_types.ml # cached
+# Target: gen_lexer.cmo, tags: { byte, compile, extension:ml, file:gen_lexer.ml, implem, ocaml, quiet }
+/usr/local/bin/ocamlc.opt -c -o gen_lexer.cmo gen_lexer.ml
 # Target: gen_parser.cmo, tags: { byte, compile, extension:ml, file:gen_parser.ml, implem, ocaml, quiet }
 /usr/local/bin/ocamlc.opt -c -o gen_parser.cmo gen_parser.ml
 # Target: abnf_location.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_location.cmx, file:abnf_location.ml, implem, native, ocaml, quiet }
@@ -41,14 +45,16 @@
 /usr/local/bin/ocamlopt.opt -c -o abnf_parser.cmx abnf_parser.ml # cached
 # Target: abnf_lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:abnf_lexer.cmx, file:abnf_lexer.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o abnf_lexer.cmx abnf_lexer.ml # cached
-# Target: gen_lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_lexer.cmx, file:gen_lexer.ml, implem, native, ocaml, quiet }
-/usr/local/bin/ocamlopt.opt -c -o gen_lexer.cmx gen_lexer.ml # cached
+# Target: aux.cmx, tags: { compile, extension:cmx, extension:ml, file:aux.cmx, file:aux.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o aux.cmx aux.ml
 # Target: gen_types.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_types.cmx, file:gen_types.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o gen_types.cmx gen_types.ml # cached
+# Target: gen_lexer.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_lexer.cmx, file:gen_lexer.ml, implem, native, ocaml, quiet }
+/usr/local/bin/ocamlopt.opt -c -o gen_lexer.cmx gen_lexer.ml
 # Target: gen_parser.cmx, tags: { compile, extension:cmx, extension:ml, file:gen_parser.cmx, file:gen_parser.ml, implem, native, ocaml, quiet }
 /usr/local/bin/ocamlopt.opt -c -o gen_parser.cmx gen_parser.ml
 # Target: gen_parser.native, tags: { dont_link_with, extension:native, file:gen_parser.native, link, native, ocaml, program, quiet }
-/usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
-+ /usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
-ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/pg/vsshs4js4xggn8mrfsgth50r0000gn/T/camlstartupe42b71.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
+/usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx aux.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
++ /usr/local/bin/ocamlopt.opt str.cmxa abnf_location.cmx abnf_syntaxtree.cmx abnf_ops.cmx abnf_parser.cmx abnf_lexer.cmx aux.cmx gen_lexer.cmx gen_types.cmx gen_parser.cmx -o gen_parser.native
+ld: warning: PIE disabled. Absolute addressing (perhaps -mdynamic-no-pic) not allowed in code signed PIE, but used in _caml_program from /var/folders/pg/vsshs4js4xggn8mrfsgth50r0000gn/T/camlstartup2c7abf.o. To fix this warning, don't compile with -mdynamic-no-pic or link with -Wl,-no_pie
 # Compilation successful.

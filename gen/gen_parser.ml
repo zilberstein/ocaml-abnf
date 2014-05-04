@@ -2,45 +2,10 @@ open Abnf_syntaxtree
 open Gen_types
 open Gen_lexer
 
+open Aux
 open Buffer
 open Printf
 open String
-
-let indent_line (b : Buffer.t) (ind : int ref) (s : string) : unit =
-  Buffer.add_string b "\n" ;
-  Buffer.add_string b (String.make (!ind * 2) ' ') ;
-  Buffer.add_string b s
-
-let indent_lines (b : Buffer.t) (ind : int ref) (l : string list) : unit =
-  List.iter (indent_line b ind) l
-
-let is_concat (r : rule) : bool =
-  begin match r with
-        | S_concat (_, _) -> true
-        | _ -> false
-  end
-
-let rec name_of_terminal (t : terminal) : string =
-  begin match t with
-        | ALPHA    -> "ALPHA"
-        | UPALPHA  -> "UALPHA"
-        | LOALPHA  -> "LOALPHA"
-        | DIGIT    -> "DIGIT"
-        | HEXDIGIT -> "HEXDIGIT"
-        | DQUOTE   -> "DQUOTE"
-        | SP       -> "SP"
-        | HTAB     -> "HTAB"
-        | WSP      -> "WSP"
-        | LWSP     -> "LWSP"
-        | VCHAR    -> "VCHAR"
-        | CHAR     -> "CHAR"
-        | OCTET    -> "OCTET"
-        | CTL      -> "CTL"
-        | CR       -> "CR"
-        | LF       -> "LF"
-        | CRLF     -> "CRLF"
-        | BIT      -> "BIT"
-  end
 
 let rec parser_of_rule_stateless (r : rule) : string =
   begin match r with
