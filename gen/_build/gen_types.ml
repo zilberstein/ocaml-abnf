@@ -1,5 +1,6 @@
 open Abnf_syntaxtree
 
+open Aux
 open Buffer
 open Printf
 open Str
@@ -50,22 +51,6 @@ let rec has_state (r : rule) : bool =
 	| S_any_except (r1, r2)      -> has_state r1 || has_state r2
   end
 
-let rec name_of (r : rule) : string = 
-  begin match r with
-	| S_terminal t      -> "???"
-	| S_string   s      -> s
-	| S_concat (r1, r2) -> 
-	   let n1 = name_of r1 in
-	   let n2 = name_of r2 in
-	   if n1 = "???" then n2 else n1
-	| S_reference s     -> s
-	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> name_of r
-	| S_repetition (i1, i2, r)   -> name_of r
-	| S_element_list (i1, i2, r) -> "???"
-	| S_hex_range (i1, i2)       -> "???"
-	| S_any_except (r1, r2)      -> "???"
-  end
 
 let type_string_of_terminal (t : terminal) : string =
   begin match t with

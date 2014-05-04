@@ -109,7 +109,14 @@ let rec name_priority (r : rule) : int =
 let rec name_of (r : rule) : string = 
   begin match r with
 	| S_terminal t      -> name_of_terminal t
-	| S_string   s      -> s
+	| S_string   s      -> 
+           begin match s with
+                 | "," -> "comma"
+                 | "." -> "period"
+                 | _ ->
+                    let r = Str.regexp "[^A-Za-z0-9_]" in
+                    Str.global_replace r "" s
+           end
 	| S_concat (r1, r2) -> 
 	   if name_priority r1 < name_priority r2 then
 	     name_of r2

@@ -13,15 +13,9 @@ let rec parser_of_rule_stateless (r : rule) : string =
 	| S_string   s      -> String.uppercase (name_of r)
 	| S_concat (r1, r2) -> sprintf "%s ; %s" (parser_of_rule_stateless r1)
                                        (parser_of_rule_stateless r2)
-	| S_reference s     -> s
-	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> type_string_of_rule r
-	| S_repetition (i1, i2, r)   -> 
-	   let ty = type_string_of_rule r in
-	   if ty = "char" then "string" else ty
-	| S_element_list (i1, i2, r) -> type_string_of_rule r
-	| S_hex_range (i1, i2)       -> type_string_of_rule r
-	| S_any_except (r1, r2)      -> type_string_of_rule r
+	| S_reference s  -> s
+	| S_alt (r1, r2) -> failwith "illegal nesting"
+	| _ -> String.uppercase (name_of r)
   end
 
 let rec parser_of_rule_stateful (r : rule) (name : string) (j : int) : string * string =
@@ -54,11 +48,8 @@ let rec parser_of_rule_stateful (r : rule) (name : string) (j : int) : string * 
 	| S_reference s     -> (sprintf "%s%d = %s" name j s,
                                 sprintf "%s%d" name j)
 	| S_alt (r1, r2)    -> failwith "illegal nesting"
-	| S_bracket r                -> parser_of_rule_stateful r name j
-	| S_repetition (i1, i2, r)   -> parser_of_rule_stateful r name j
-	| S_element_list (i1, i2, r) -> parser_of_rule_stateful r name j
-	| S_hex_range (i1, i2)       -> ("HEX", "RANGE")
-	| S_any_except (r1, r2)      -> parser_of_rule_stateful r1 name j
+	| _ -> (sprintf "%s%d = %s" name j (String.uppercase (name_of r)),
+                sprintf "%s%d" name j)
    end
 
 let rec parser_of_rule (r : rule) (name : string) (j : int) : string =
@@ -120,6 +111,7 @@ let _ =
   close_out types ;
   let lexer = open_out "gen/lexer.mll" in
   List.iter (rule_to_file lexer regex_of_rule_definition) rules ;
+  fprintf lexer "rule read =\n  parse\n" ;
   List.iter (rule_to_file lexer lexer_of_rule_definition) rules ;
   close_out lexer ;
   let start =

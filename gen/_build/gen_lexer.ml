@@ -2,6 +2,7 @@ open Abnf_syntaxtree
 
 open Aux
 open Buffer
+open Gen_types
 open Printf
 open Str
 open String
@@ -76,7 +77,12 @@ let rec lexer_of_rule_stateless (r : rule) : string =
   "read lexbuf"
 
 let rec lexer_of_rule_stateful (r : rule) : string =
-  sprintf "%s (Lexing.lexeme lexbuf)" (String.uppercase (name_of r))
+  let t = type_string_of_rule r in
+  let name = String.uppercase (name_of r) in
+  if t = "int" then
+    sprintf "%s (int_of_string(Lexing.lexeme lexbuf))" name
+  else
+    sprintf "%s (Lexing.lexeme lexbuf)" name
 
 let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
   begin match r with
@@ -89,10 +95,10 @@ let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
                               sprintf "%s\n%s"
                                       (lexer_of_rule (S_concat (r1, r3)) name j) 
                                       (lexer_of_rule r4 name (j+1))
-                           | _ -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateless r)
+                           | _ -> sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateless r)
                      end
                  | true,  false ->
-                    sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
+                    sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateful r)
                  | true,  true  ->
                     sprintf "%s\n%s" (lexer_of_rule r1 name j)
                             (lexer_of_rule r2 name (j + 1))
@@ -106,7 +112,7 @@ let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
                                            (lexer_of_rule r2 name (j + 1))
            end
 	| S_reference s -> ""
-        | _             -> sprintf "%s%d\t{ %s }" name j (lexer_of_rule_stateful r)
+        | _             -> sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateful r)
   end
 
 let lexer_of_rule_definition (rd : rule_definition) : string =

@@ -1,1 +1,1 @@
-gen_types.ml: Abnf_syntaxtree Buffer Printf Str
+gen_types.ml: Abnf_syntaxtree Aux Buffer Printf Str

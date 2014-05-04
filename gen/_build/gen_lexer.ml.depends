@@ -1,1 +1,1 @@
-gen_lexer.ml: Abnf_syntaxtree Aux Buffer Printf Str String
+gen_lexer.ml: Abnf_syntaxtree Aux Buffer Gen_types Printf Str String
