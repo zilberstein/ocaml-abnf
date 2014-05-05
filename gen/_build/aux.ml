@@ -132,3 +132,7 @@ let rec name_of (r : rule) : string =
 	| S_hex_range (i1, i2)       -> "???"
 	| S_any_except (r1, r2)      -> "???"
   end
+
+let counter (i : int) : (unit -> int) =
+  let c = ref i in
+  fun () -> c := !c + 1 ; !c

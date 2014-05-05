@@ -55,21 +55,23 @@ let rec regex_of_inner_rule (r : rule) : string =
   end
 
 
-let rec regex_of_rule (r : rule) (name : string) (j : int) : string =
+let rec regex_of_rule (r : rule) (name : string) (c : unit -> int) : string =
   begin match r with
 	| S_concat (r1, r2) ->
-           sprintf "%s\n%s" (regex_of_rule r1 name j)
-                   (regex_of_rule r2 name (j + 1))
+           sprintf "%s\n%s" (regex_of_rule r1 name c)
+                   (regex_of_rule r2 name c)
         | S_alt (r1, r2) ->
-           sprintf "%s\n%s" (regex_of_rule r1 name j)
-                   (regex_of_rule r2 name (j + 1))
+           sprintf "%s\n%s" (regex_of_rule r1 name c)
+                   (regex_of_rule r2 name c)
 	| S_reference s -> ""
-        | _             -> sprintf "let %s%d = %s" name j (regex_of_inner_rule r)
+        | _             -> sprintf "let %s%d = %s" name (c ())
+                                   (regex_of_inner_rule r)
   end
 
 let regex_of_rule_definition (rd : rule_definition) : string =
+  let c = counter 0 in
   let b = Buffer.create 16 in
-  Buffer.add_string b (regex_of_rule rd.s_rule rd.s_name 0) ;
+  Buffer.add_string b (regex_of_rule rd.s_rule rd.s_name c) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
 
@@ -84,39 +86,26 @@ let rec lexer_of_rule_stateful (r : rule) : string =
   else
     sprintf "%s (Lexing.lexeme lexbuf)" name
 
-let rec lexer_of_rule (r : rule) (name : string) (j : int) : string =
+let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) : string =
   begin match r with
 	| S_concat (r1, r2) ->
-           begin match has_state r1, has_state r2 with
-                 | false, false -> ""
-                 | false, true  ->
-                    begin match r2 with
-                           | S_concat (r3, r4) ->
-                              sprintf "%s\n%s"
-                                      (lexer_of_rule (S_concat (r1, r3)) name j) 
-                                      (lexer_of_rule r4 name (j+1))
-                           | _ -> sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateless r)
-                     end
-                 | true,  false ->
-                    sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateful r)
-                 | true,  true  ->
-                    sprintf "%s\n%s" (lexer_of_rule r1 name j)
-                            (lexer_of_rule r2 name (j + 1))
-           end
+           sprintf "%s\n%s" (lexer_of_rule r1 name c)
+                   (lexer_of_rule r2 name c)
         | S_alt (r1, r2) ->
            begin match has_state r1, has_state r2 with
                  | false, false -> ""
-                 | false, true  -> lexer_of_rule r2 name j 
-                 | true,  false -> lexer_of_rule r1 name j
-                 | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name j)
-                                           (lexer_of_rule r2 name (j + 1))
+                 | false, true  -> lexer_of_rule r2 name c 
+                 | true,  false -> lexer_of_rule r1 name c
+                 | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name c)
+                                           (lexer_of_rule r2 name c)
            end
 	| S_reference s -> ""
-        | _             -> sprintf "  %s%d\t{ %s }" name j (lexer_of_rule_stateful r)
+        | _             -> sprintf "  %s%d\t{ %s }" name (c ()) (lexer_of_rule_stateful r)
   end
 
 let lexer_of_rule_definition (rd : rule_definition) : string =
+  let c = counter 0 in
   let b = Buffer.create 16 in
-  Buffer.add_string b (lexer_of_rule rd.s_rule rd.s_name 0) ;
+  Buffer.add_string b (lexer_of_rule rd.s_rule rd.s_name c) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
