@@ -7,6 +7,20 @@ open Printf
 open Str
 open String
 
+let lexer_header : ('a, out_channel, unit) format = 
+"{
+open Lexing
+open Parser
+
+exception SyntaxError of string
+
+let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p <-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+               pos_lnum = pos.pos_lnum + 1
+    }
+}\n"
 
 let regex_of_terminal (t : terminal) : string =
   begin match t with
@@ -76,7 +90,7 @@ let regex_of_rule_definition (rd : rule_definition) : string =
   Buffer.contents b
 
 let rec lexer_of_rule_stateless (r : rule) : string =
-  "read lexbuf"
+  String.uppercase (name_of r)
 
 let rec lexer_of_rule_stateful (r : rule) : string =
   let t = type_string_of_rule r in
@@ -89,23 +103,26 @@ let rec lexer_of_rule_stateful (r : rule) : string =
 let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) : string =
   begin match r with
 	| S_concat (r1, r2) ->
-           sprintf "%s\n%s" (lexer_of_rule r1 name c)
+           sprintf "%s%s" (lexer_of_rule r1 name c)
                    (lexer_of_rule r2 name c)
         | S_alt (r1, r2) ->
            begin match has_state r1, has_state r2 with
                  | false, false -> ""
                  | false, true  -> lexer_of_rule r2 name c 
                  | true,  false -> lexer_of_rule r1 name c
-                 | true,  true  -> sprintf "%s\n%s" (lexer_of_rule r1 name c)
+                 | true,  true  -> sprintf "%s%s" (lexer_of_rule r1 name c)
                                            (lexer_of_rule r2 name c)
            end
 	| S_reference s -> ""
-        | _             -> sprintf "  %s%d\t{ %s }" name (c ()) (lexer_of_rule_stateful r)
+        | _             -> sprintf "\n  | %s%d\t{ %s }" name (c ()) 
+                                   (if has_state r then
+                                      lexer_of_rule_stateful r
+                                    else
+                                      lexer_of_rule_stateless r)
   end
 
 let lexer_of_rule_definition (rd : rule_definition) : string =
   let c = counter 0 in
   let b = Buffer.create 16 in
   Buffer.add_string b (lexer_of_rule rd.s_rule rd.s_name c) ;
-  Buffer.add_string b "\n" ;
   Buffer.contents b

@@ -110,8 +110,9 @@ let _ =
   List.iter (rule_to_file types string_of_rule_definition) rules ;
   close_out types ;
   let lexer = open_out "gen/lexer.mll" in
+  fprintf lexer lexer_header ;
   List.iter (rule_to_file lexer regex_of_rule_definition) rules ;
-  fprintf lexer "rule read =\n  parse\n" ;
+  fprintf lexer "rule read =\n  parse" ;
   List.iter (rule_to_file lexer lexer_of_rule_definition) rules ;
   close_out lexer ;
   let start =
