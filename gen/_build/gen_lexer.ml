@@ -9,17 +9,8 @@ open String
 
 let lexer_header : ('a, out_channel, unit) format = 
 "{
-open Lexing
-open Parser
-
-exception SyntaxError of string
-
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p <-
-    { pos with pos_bol = lexbuf.lex_curr_pos;
-               pos_lnum = pos.pos_lnum + 1
-    }
+  open Lexing
+  open Parser
 }\n"
 
 let regex_of_terminal (t : terminal) : string =
@@ -54,15 +45,9 @@ let rec regex_of_inner_rule (r : rule) : string =
 	| S_bracket r                -> regex_of_inner_rule r
 	| S_repetition (io1, io2, r) -> sprintf "%s%s" (regex_of_inner_rule r)
                        (begin match io1, io2 with
-                              | None, None       -> "*"
-                              | None, Some i     -> sprintf "{,%d}" i
-                              | Some i, None     -> if i = 1 then "+" else sprintf "{%d,}" i
-                              | Some i1, Some i2 ->
-                                 if i1 = i2 then 
-                                   sprintf "{%d}" i1
-                                 else
-                                   sprintf "{%d,%d}" i1 i2
-                        end)      
+                              | Some i, None     -> if i = 1 then "+" else "*"
+                              | _, _ -> "*"
+                        end)
 	| S_element_list (i1, i2, r) -> regex_of_inner_rule r
 	| S_hex_range (i1, i2)       -> sprintf "[ \\%d - \\%d ]" i1 i2
 	| S_any_except (r1, r2)      -> regex_of_inner_rule r1
