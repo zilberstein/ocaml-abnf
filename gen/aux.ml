@@ -232,13 +232,8 @@ let rec get_tokens (r : rule) : (string * string option) list =
 	| S_concat (r1, r2) ->
           get_tokens r1 @ get_tokens r2
         | S_alt (r1, r2) ->
-           begin match has_state r1, has_state r2 with
-                 | false, false -> [("", None)]
-                 | false, true  -> get_tokens r2
-                 | true,  false -> get_tokens r1
-                 | true,  true  -> get_tokens r1 @ get_tokens r2
-           end
-	| S_reference s -> []
+           get_tokens r1 @ get_tokens r2
+        | S_reference s -> []
         | _ -> [(String.uppercase (name_of r),
                  if has_state r then
                    Some (type_string_of_rule r)

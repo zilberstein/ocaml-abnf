@@ -90,14 +90,8 @@ let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) : string =
 	| S_concat (r1, r2) ->
            sprintf "%s%s" (lexer_of_rule r1 name c)
                    (lexer_of_rule r2 name c)
-        | S_alt (r1, r2) ->
-           begin match has_state r1, has_state r2 with
-                 | false, false -> ""
-                 | false, true  -> lexer_of_rule r2 name c 
-                 | true,  false -> lexer_of_rule r1 name c
-                 | true,  true  -> sprintf "%s%s" (lexer_of_rule r1 name c)
-                                           (lexer_of_rule r2 name c)
-           end
+        | S_alt (r1, r2) -> sprintf "%s%s" (lexer_of_rule r1 name c)
+                                    (lexer_of_rule r2 name c)
 	| S_reference s -> ""
         | _             -> sprintf "\n  | %s%d\t{ %s }" name (c ()) 
                                    (if has_state r then

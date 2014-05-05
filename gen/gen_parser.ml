@@ -58,31 +58,41 @@ let rec parser_of_rule_stateful (r : rule) (name : string) (c : unit -> int) : s
 	| S_alt (r1, r2)    -> failwith "illegal nesting"
 	| _ -> (String.uppercase (name_of r),
                 sprintf "$%d" (c ()))
-   end
+  end
 
-let rec parser_of_rule (r : rule) (name : string) : string =
+let parser_of_rule_constructed (r : rule) : string =
+  if has_state r then
+    let seq, state = parser_of_rule_stateful r "x" (counter 0) in
+    sprintf "  | %s { %s (%s) }" seq (name_of r) state
+  else
+    sprintf "  | %s { %s }" (parser_of_rule_stateless r (counter 0))
+            (name_of r)
+
+let rec parser_of_rule (r : rule) : string =
   begin match r with
         | S_alt (r1, r2) ->
-           let (seq1, state1) = parser_of_rule_stateful r1 "x" (counter 0) in
            if is_alt r2 then
-             sprintf "  | %s { %s %s }\n%s" 
-                     seq1 (name_of r1) state1
-                     (parser_of_rule r2 name)
+             sprintf "%s\n%s" 
+                     (parser_of_rule_constructed r1)
+                     (parser_of_rule r2)
            else
-             let (seq2, state2) = parser_of_rule_stateful r2 "x" (counter 0) in
-             sprintf "  | %s { %s %s }\n  | %s { %s %s }" 
-                     seq1 (name_of r1) state1
-                     seq2 (name_of r2) state2
-        | _ -> match (parser_of_rule_stateful r "x" (counter 0)) with
-                                   | seq, state ->
-                                      sprintf "  | %s { %s }" seq state 
+             sprintf "%s\n%s" 
+                     (parser_of_rule_constructed r1)
+                     (parser_of_rule_constructed r2)
+        | _ ->
+           if has_state r then
+             let seq, state = parser_of_rule_stateful r "x" (counter 0) in
+             sprintf "  | %s { %s }" seq state
+           else
+             sprintf "  | %s { %s }" (parser_of_rule_stateless r (counter 0))
+                     (name_of r)
   end
 
 let parser_of_rule_definition (rd : rule_definition) : string =
   let b = Buffer.create 16 in
   Buffer.add_string b rd.s_name ;
   Buffer.add_string b ":\n" ;
-  Buffer.add_string b (parser_of_rule rd.s_rule rd.s_name) ;
+  Buffer.add_string b (parser_of_rule rd.s_rule) ;
   Buffer.add_string b "\n" ;
   Buffer.contents b
 
@@ -92,7 +102,7 @@ let rule_to_file (oc : out_channel) (t : rule_definition -> string) (r : rule_de
   output oc s 0 (length s)
 
 let _ =
-  let lexbuf = Lexing.from_channel (open_in "ex.abnf") in
+  let lexbuf = Lexing.from_channel (open_in (Sys.argv.(1))) in
   let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
   let types = open_out "gen/types.ml" in
   List.iter (rule_to_file types string_of_rule_definition) (List.rev rules) ;
