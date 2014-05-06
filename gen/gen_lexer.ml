@@ -83,7 +83,10 @@ let rec lexer_of_rule_stateful (r : rule) : string =
   if t = "int" then
     sprintf "%s (int_of_string(Lexing.lexeme lexbuf))" name
   else
-    sprintf "%s (Lexing.lexeme lexbuf)" name
+    if t = "char" then
+      sprintf "%s ((Lexing.lexeme lexbuf).[0])" name
+    else
+      sprintf "%s (Lexing.lexeme lexbuf)" name
 
 let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) : string =
   begin match r with

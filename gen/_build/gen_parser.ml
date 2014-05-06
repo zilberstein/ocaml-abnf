@@ -63,10 +63,10 @@ let rec parser_of_rule_stateful (r : rule) (name : string) (c : unit -> int) : s
 let parser_of_rule_constructed (r : rule) : string =
   if has_state r then
     let seq, state = parser_of_rule_stateful r "x" (counter 0) in
-    sprintf "  | %s { %s (%s) }" seq (name_of r) state
+    sprintf "  | %s { %s (%s) }" seq (String.capitalize (name_of r)) state
   else
     sprintf "  | %s { %s }" (parser_of_rule_stateless r (counter 0))
-            (name_of r)
+            (String.capitalize (name_of r))
 
 let rec parser_of_rule (r : rule) : string =
   begin match r with

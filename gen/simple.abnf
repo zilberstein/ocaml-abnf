@@ -1,0 +1,2 @@
+yes = DIGIT LF / "NO" SP no LF
+no = "hi" / "bye"
