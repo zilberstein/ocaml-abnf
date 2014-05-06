@@ -88,23 +88,22 @@ let rec lexer_of_rule_stateful (r : rule) : string =
     else
       sprintf "%s (Lexing.lexeme lexbuf)" name
 
-let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) : string =
+let rec lexer_of_rule (r : rule) (name : string) (c : unit -> int) :
+          (string * int)  list =
   begin match r with
 	| S_concat (r1, r2) ->
-           sprintf "%s%s" (lexer_of_rule r1 name c)
-                   (lexer_of_rule r2 name c)
-        | S_alt (r1, r2) -> sprintf "%s%s" (lexer_of_rule r1 name c)
-                                    (lexer_of_rule r2 name c)
-	| S_reference s -> ""
-        | _             -> sprintf "\n  | %s%d\t{ %s }" name (c ()) 
-                                   (if has_state r then
-                                      lexer_of_rule_stateful r
-                                    else
-                                      lexer_of_rule_stateless r)
+           lexer_of_rule r1 name c @ lexer_of_rule r2 name c
+        | S_alt (r1, r2) ->
+           lexer_of_rule r1 name c @ lexer_of_rule r2 name c
+	| S_reference s -> []
+        | _             -> [sprintf "\n  | %s%d\t{ %s }" name (c ()) 
+                                    (if has_state r then
+                                       lexer_of_rule_stateful r
+                                     else
+                                       lexer_of_rule_stateless r),
+                            name_priority r]
   end
 
-let lexer_of_rule_definition (rd : rule_definition) : string =
+let lexer_of_rule_definition (rd : rule_definition) : (string * int) list =
   let c = counter 0 in
-  let b = Buffer.create 16 in
-  Buffer.add_string b (lexer_of_rule rd.s_rule rd.s_name c) ;
-  Buffer.contents b
+  lexer_of_rule rd.s_rule rd.s_name c

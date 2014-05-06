@@ -111,7 +111,10 @@ let _ =
   fprintf lexer lexer_header ;
   List.iter (rule_to_file lexer regex_of_rule_definition) rules ;
   fprintf lexer "rule read = parse" ;
-  List.iter (rule_to_file lexer lexer_of_rule_definition) rules ;
+  let lexers = List.sort (fun a b -> snd b - snd a)
+                         (List.concat (List.map lexer_of_rule_definition rules))
+  in
+  List.iter (fun (s,_) -> output lexer s 0 (length s)) lexers ;
   close_out lexer ;
   let start =
     begin match rules with
