@@ -189,7 +189,7 @@ let rec name_priority (r : rule) : int =
                                    (name_priority r2)
 	| S_reference _     -> 1
 	| S_alt (_, _)      -> failwith "illegal nesting"
-	| S_bracket _              -> name_priority r
+	| S_bracket r              -> name_priority r
 	| S_repetition (i1, i2, r) -> name_priority r
 	| S_element_list (i1, i2, r) -> name_priority r
 	| S_hex_range (i1, i2)       -> 1

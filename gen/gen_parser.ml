@@ -104,9 +104,14 @@ let rule_to_file (oc : out_channel) (t : rule_definition -> string) (r : rule_de
 let _ =
   let lexbuf = Lexing.from_channel (open_in (Sys.argv.(1))) in
   let rules = Abnf_parser.main Abnf_lexer.token lexbuf in
+  
+  print_endline "Generated types.ml..." ;
   let types = open_out "gen/types.ml" in
   List.iter (rule_to_file types string_of_rule_definition) (List.rev rules) ;
   close_out types ;
+  print_endline "done." ;
+
+  print_endline "Generating lexer.mll..." ;
   let lexer = open_out "gen/lexer.mll" in
   fprintf lexer lexer_header ;
   List.iter (rule_to_file lexer regex_of_rule_definition) rules ;
@@ -116,6 +121,9 @@ let _ =
   in
   List.iter (fun (s,_) -> output lexer s 0 (length s)) lexers ;
   close_out lexer ;
+  print_endline "done." ;
+
+  print_endline "Generating parser.mly..." ;
   let start =
     begin match rules with
           | h :: t -> h
@@ -127,4 +135,5 @@ let _ =
   fprintf parser "%%start %s\n" start.s_name ;
   fprintf parser "%%type <Types.%s> %s\n%%%%\n" start.s_name start.s_name ;
   List.iter (rule_to_file parser parser_of_rule_definition) rules ;
-  close_out parser
+  close_out parser ;
+  print_endline "done."

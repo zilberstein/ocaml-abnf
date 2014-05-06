@@ -1,4 +1,4 @@
 address = 1*(DIGIT) SP street LF city "," SP state 
 street = 1*ALPHA SP "Rd" / 1*ALPHA SP "St" / 1*ALPHA SP "Blvd" / 1*ALPHA SP "Ave"
 city = 1*ALPHA
-state = 2ALPHA
+state = 1*ALPHA
